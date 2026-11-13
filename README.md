@@ -1,6 +1,7 @@
 # E-Commerce Multi-Filter
 
-Stage 1 establishes the React 18/Vite client and Express API foundation.
+Monorepo foundation for an e-commerce filtering application. The client uses
+React 18 and Vite; the API uses Node.js and Express with ES modules.
 
 ## Requirements
 
@@ -9,31 +10,28 @@ Stage 1 establishes the React 18/Vite client and Express API foundation.
 
 ## Install
 
-From the project root:
+From the repository root:
 
 ```powershell
-npm install
+npm run install:all
 ```
 
-## Run locally
+## Run both applications
 
-Start the API and client in separate terminals from the project root:
+Copy `server/.env.example` to `server/.env` if you want to customize the local
+server configuration, then run:
 
 ```powershell
-npm run dev:server
+npm run dev
 ```
 
-```powershell
-npm run dev:client
-```
-
-The client runs on the Vite development server and proxies `/api` requests to
-the API on port 3000. The health endpoint is `GET /api/health`.
+The client is available at `http://localhost:5173`. The API listens on
+`http://localhost:5000`, and Vite proxies `/api` requests to it.
 
 ## Verify
 
 ```powershell
 npm test
-npm run build
-npm run lint
 ```
+
+The health endpoint is `GET /api/health`.
