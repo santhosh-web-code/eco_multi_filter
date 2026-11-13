@@ -21,6 +21,8 @@ export function useProductCatalog() {
     status: 'loading',
     error: null,
   })
+  const [metadataAttempt, setMetadataAttempt] = useState(0)
+  const [catalogAttempt, setCatalogAttempt] = useState(0)
   const requestIdRef = useRef(0)
   const debouncedPriceRange = useDebouncedValue(state.priceRange, 150)
   const filters = useMemo(
@@ -49,10 +51,10 @@ export function useProductCatalog() {
       })
 
     return () => controller.abort()
-  }, [])
+  }, [metadataAttempt])
 
   useEffect(() => {
-    if (metadata.status === 'loading') {
+    if (metadata.status !== 'success') {
       return undefined
     }
 
@@ -97,13 +99,28 @@ export function useProductCatalog() {
       })
 
     return () => controller.abort()
-  }, [filters, metadata.status, state.sort])
+  }, [catalogAttempt, filters, metadata.status, state.sort])
 
-  const status = metadata.status === 'loading' || catalog.status === 'loading'
-    ? 'loading'
-    : metadata.error || catalog.error
-      ? 'error'
-      : 'success'
+  function retry() {
+    if (metadata.status === 'error') {
+      setMetadata((currentMetadata) => ({
+        ...currentMetadata,
+        status: 'loading',
+        error: null,
+      }))
+      setMetadataAttempt((attempt) => attempt + 1)
+      return
+    }
+
+    setCatalog((currentCatalog) => ({
+      ...currentCatalog,
+      status: 'loading',
+      error: null,
+    }))
+    setCatalogAttempt((attempt) => attempt + 1)
+  }
+
+  const status = metadata.status === 'success' ? catalog.status : metadata.status
 
   return {
     items: catalog.items,
@@ -111,8 +128,9 @@ export function useProductCatalog() {
     total: catalog.total,
     meta: metadata.data,
     status,
-    error: catalog.error || metadata.error,
+    error: metadata.status === 'error' ? metadata.error : catalog.error,
     state,
     dispatch,
+    retry,
   }
 }
